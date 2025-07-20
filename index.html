@@ -2,156 +2,107 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Malla Curricular - Ingeniería de Sistemas UTP</title>
+  <title>Malla Interactiva Horizontal – Ciclos 1 al 4</title>
   <style>
-    body { font-family: Arial, sans-serif; padding: 20px; background-color: #f9f9f9; }
-    h1 { color: #2c3e50; }
-    .ciclo { margin-bottom: 30px; }
-    .ciclo h2 { background-color: #2980b9; color: white; padding: 10px; border-radius: 5px; }
-    .cursos { display: flex; flex-wrap: wrap; gap: 10px; }
-    .curso {
-      background-color: #ecf0f1;
-      border-left: 5px solid #3498db;
-      padding: 10px;
-      border-radius: 5px;
-      width: calc(33% - 20px);
-      box-sizing: border-box;
-    }
+    body{font-family:'Segoe UI',sans-serif;background:#f5f6fa;margin:0;padding:20px;color:#2c3e50}
+    h1{text-align:center;color:#1c1c1c;margin-top:0}
+    .fila-ciclos{display:flex;gap:20px;overflow-x:auto;padding:20px 0}
+    .ciclo{flex:0 0 360px;background:#fff;border-radius:10px;padding:20px;
+           box-shadow:0 2px 10px rgba(0,0,0,.1)}
+    .ciclo h2{border-left:6px solid #000;padding-left:12px;color:#000;margin:0 0 16px}
+    .curso{margin:10px 0;padding:14px;border-radius:8px;border:2px solid transparent;
+           width:100%;text-align:center;font-size:15px;font-weight:bold;cursor:pointer;
+           transition:.3s}
+    .bloqueado{background:#333;color:#aaa;cursor:not-allowed}
+    .activo{background:#fff;color:#000;border-color:#000}
+    .activo:hover{background:#000;color:#fff}
+    .completado{background:#27ae60;color:#fff;text-decoration:line-through}
   </style>
 </head>
 <body>
-  <h1>Malla Curricular - Ingeniería de Sistemas e Informática (UTP)</h1>
-  <div id="malla"></div>
+  <h1>Malla Interactiva Horizontal – Ciclos 1 al 4</h1>
+  <div class="fila-ciclos" id="contenedor"></div>
 
   <script>
-    const malla = [
-      {
-        ciclo: 1,
-        cursos: [
-          "Introducción a la Vida Universitaria",
-          "Matemática 1",
-          "Comprensión y Redacción de Textos 1",
-          "Problemas y Desafíos del Perú Actual",
-          "Principios de Algoritmos",
-          "Inglés 1"
-        ]
-      },
-      {
-        ciclo: 2,
-        cursos: [
-          "Matemática 2",
-          "Comprensión y Redacción de Textos 2",
-          "Estadística Descriptiva y Probabilidades",
-          "Cálculo 1",
-          "Introducción a las TIC",
-          "Inglés 2"
-        ]
-      },
-      {
-        ciclo: 3,
-        cursos: [
-          "Cálculo 2",
-          "Matemática Discreta",
-          "Taller de Programación",
-          "Investigación Académica",
-          "Ciudadanía y Reflexión Ética",
-          "Inglés 3"
-        ]
-      },
-      {
-        ciclo: 4,
-        cursos: [
-          "Algoritmos y Estructura de Datos",
-          "Programación Orientada a Objetos",
-          "Lenguajes de Programación",
-          "Análisis y Diseño de Sistemas de Información",
-          "Base de Datos 1",
-          "Individuo y Medio Ambiente"
-        ]
-      },
-      {
-        ciclo: 5,
-        cursos: [
-          "Sistemas Operativos",
-          "Fundamentos de Electromagnetismo",
-          "Base de Datos 2",
-          "Redes y Comunicación de Datos 1",
-          "Estadística Inferencial",
-          "Herramientas para la Comunicación Efectiva"
-        ]
-      },
-      {
-        ciclo: 6,
-        cursos: [
-          "Herramientas Informáticas para la Toma de Decisiones",
-          "Interacción Hombre-Máquina",
-          "JavaScript Avanzado",
-          "Análisis y Diseño de Algoritmos",
-          "Curso Integrador 1: Sistemas Software",
-          "Ética Profesional"
-        ]
-      },
-      {
-        ciclo: 7,
-        cursos: [
-          "Nuevas Tecnologías y Tendencias",
-          "Diseño de Productos y Servicios",
-          "Desarrollo Web Integrado",
-          "Curso Integrador 2: Sistemas",
-          "Innovación y Transformación Digital",
-          "Liderazgo y Gestión de Equipos"
-        ]
-      },
-      {
-        ciclo: 8,
-        cursos: [
-          "Gestión del Servicio TI",
-          "Gestión de Proyectos",
-          "Negociación y Narrativa",
-          "Herramientas de Prototipiado",
-          "Electivo 1",
-          "Sistemas de Información Empresarial"
-        ]
-      },
-      {
-        ciclo: 9,
-        cursos: [
-          "Planeamiento Estratégico de las TICs",
-          "Gestión del Conocimiento",
-          "Electivo 2",
-          "Electivo 3",
-          "Prácticas Preprofesionales I",
-          "Taller de Investigación - Sistemas"
-        ]
-      },
-      {
-        ciclo: 10,
-        cursos: [
-          "Diseño e Implementación de Arquitectura Empresarial",
-          "Inteligencia de Negocios",
-          "Electivo 4",
-          "Electivo 5",
-          "Prácticas Preprofesionales II"
-        ]
-      }
-    ];
+    /* ------------ Datos -------------- */
+    const cursos = {
+      "CICLO I":[
+        {n:"INTRODUCCIÓN A LA VIDA UNIVERSITARIA"},
+        {n:"INTRODUCCIÓN A LA MATEMÁTICA PARA INGENIERÍA",alias:"MATEMÁTICA 1"},
+        {n:"PRINCIPIOS DE ALGORITMOS"},
+        {n:"INDIVIDUO Y MEDIO AMBIENTE"},
+        {n:"COMPRENSIÓN Y REDACCIÓN DE TEXTOS I"},
+        {n:"INGLÉS I"}
+      ],
+      "CICLO II":[
+        {n:"CÁLCULO APLICADO A LA FÍSICA 1",pre:["INTRODUCCIÓN A LA MATEMÁTICA PARA INGENIERÍA"]},
+        {n:"MATEMÁTICA PARA INGENIEROS I",alias:"MATEMÁTICA 2",pre:["INTRODUCCIÓN A LA MATEMÁTICA PARA INGENIERÍA"]},
+        {n:"MATEMÁTICA DISCRETA",pre:["INTRODUCCIÓN A LA MATEMÁTICA PARA INGENIERÍA"]},
+        {n:"COMPRENSIÓN Y REDACCIÓN DE TEXTOS II",pre:["COMPRENSIÓN Y REDACCIÓN DE TEXTOS I"]},
+        {n:"INGLÉS II",pre:["INGLÉS I"]},
+        {n:"INTRODUCCIÓN A LAS TIC",pre:["INTRODUCCIÓN A LA VIDA UNIVERSITARIA"]}
+      ],
+      "CICLO III":[
+        {n:"TALLER DE PROGRAMACIÓN",pre:["PRINCIPIOS DE ALGORITMOS","INTRODUCCIÓN A LAS TIC"]},
+        {n:"CIUDADANÍA Y REFLEXIÓN ÉTICA",pre:["INDIVIDUO Y MEDIO AMBIENTE"]},
+        {n:"CÁLCULO 1",pre:["MATEMÁTICA PARA INGENIEROS I"]},
+        {n:"ESTADÍSTICA INFERENCIAL",pre:["MATEMÁTICA PARA INGENIEROS I"]},
+        {n:"MECÁNICA CLÁSICA",pre:["MATEMÁTICA PARA INGENIEROS I"]},
+        {n:"LABORATORIO DE MECÁNICA CLÁSICA",pre:["MECÁNICA CLÁSICA"]},
+        {n:"INGLÉS III",pre:["INGLÉS II"]}
+      ],
+      "CICLO IV":[
+        {n:"PROGRAMACIÓN ORIENTADA A OBJETOS",pre:["TALLER DE PROGRAMACIÓN"]},
+        {n:"ANÁLISIS Y DISEÑO DE ALGORITMOS",pre:["TALLER DE PROGRAMACIÓN"]},
+        {n:"CÁLCULO 2",pre:["CÁLCULO 1"]},
+        {n:"INVESTIGACIÓN ACADÉMICA",pre:["COMPRENSIÓN Y REDACCIÓN DE TEXTOS II"]},
+        {n:"BASE DE DATOS 1",pre:["TALLER DE PROGRAMACIÓN"]},
+        {n:"FUNDAMENTOS DE ELECTROMAGNETISMO",pre:["MECÁNICA CLÁSICA"]},
+        {n:"LABORATORIO DE FUNDAMENTOS DE ELECTROMAGNETISMO",pre:["FUNDAMENTOS DE ELECTROMAGNETISMO"]},
+        {n:"INGLÉS IV",pre:["INGLÉS III"]}
+      ]
+    };
 
-    const container = document.getElementById("malla");
+    /* ---------- Estado guardado ---------- */
+    const estado = JSON.parse(localStorage.getItem('estadoCursos')||'{}');
 
-    malla.forEach(({ ciclo, cursos }) => {
-      const div = document.createElement("div");
-      div.className = "ciclo";
-      div.innerHTML = `<h2>Ciclo ${ciclo}</h2>`;
-      const cursoList = document.createElement("div");
-      cursoList.className = "cursos";
-      cursos.forEach(curso => {
-        const c = document.createElement("div");
-        c.className = "curso";
-        c.textContent = curso;
-        cursoList.appendChild(c);
+    function save(){localStorage.setItem('estadoCursos',JSON.stringify(estado));}
+
+    function requisitosCumplidos(req=[]){
+      return req.every(r=>estado[r]);
+    }
+
+    /* ---------- Render ---------- */
+    const cont = document.getElementById('contenedor');
+    cont.innerHTML='';
+    Object.entries(cursos).forEach(([ciclo,lista])=>{
+      const div=document.createElement('div');div.className='ciclo';
+      div.innerHTML=`<h2>${ciclo}</h2>`;
+      lista.forEach(c=>{
+        const label=c.alias||c.n;
+        const btn=document.createElement('button');
+        btn.className='curso';
+        btn.textContent=label;
+        const completo=estado[c.n];
+        const activo=!completo&&requisitosCumplidos(c.pre);
+        if(completo){
+          btn.classList.add('completado');
+          btn.textContent='✅ '+label;
+        }else if(activo){
+          btn.classList.add('activo');
+        }else{
+          btn.classList.add('bloqueado');
+          btn.disabled=true;
+        }
+        btn.onclick=()=>{
+          if(btn.classList.contains('bloqueado'))return;
+          estado[c.n]=!estado[c.n];
+          save();
+          location.reload();
+        };
+        div.appendChild(btn);
       });
-      div.appendChild(cursoList);
-      container.appendChild(div);
+      cont.appendChild(div);
     });
   </script>
 </body>
