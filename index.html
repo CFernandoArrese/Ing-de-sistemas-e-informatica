@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Malla Curricular - Ingeniería de Sistemas UTP</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; background-color: #f9f9f9; }
+    h1 { color: #2c3e50; }
+    .ciclo { margin-bottom: 30px; }
+    .ciclo h2 { background-color: #2980b9; color: white; padding: 10px; border-radius: 5px; }
+    .cursos { display: flex; flex-wrap: wrap; gap: 10px; }
+    .curso {
+      background-color: #ecf0f1;
+      border-left: 5px solid #3498db;
+      padding: 10px;
+      border-radius: 5px;
+      width: calc(33% - 20px);
+      box-sizing: border-box;
+    }
+  </style>
+</head>
+<body>
+  <h1>Malla Curricular - Ingeniería de Sistemas e Informática (UTP)</h1>
+  <div id="malla"></div>
+
+  <script>
+    const malla = [
+      {
+        ciclo: 1,
+        cursos: [
+          "Introducción a la Vida Universitaria",
+          "Matemática 1",
+          "Comprensión y Redacción de Textos 1",
+          "Problemas y Desafíos del Perú Actual",
+          "Principios de Algoritmos",
+          "Inglés 1"
+        ]
+      },
+      {
+        ciclo: 2,
+        cursos: [
+          "Matemática 2",
+          "Comprensión y Redacción de Textos 2",
+          "Estadística Descriptiva y Probabilidades",
+          "Cálculo 1",
+          "Introducción a las TIC",
+          "Inglés 2"
+        ]
+      },
+      {
+        ciclo: 3,
+        cursos: [
+          "Cálculo 2",
+          "Matemática Discreta",
+          "Taller de Programación",
+          "Investigación Académica",
+          "Ciudadanía y Reflexión Ética",
+          "Inglés 3"
+        ]
+      },
+      {
+        ciclo: 4,
+        cursos: [
+          "Algoritmos y Estructura de Datos",
+          "Programación Orientada a Objetos",
+          "Lenguajes de Programación",
+          "Análisis y Diseño de Sistemas de Información",
+          "Base de Datos 1",
+          "Individuo y Medio Ambiente"
+        ]
+      },
+      {
+        ciclo: 5,
+        cursos: [
+          "Sistemas Operativos",
+          "Fundamentos de Electromagnetismo",
+          "Base de Datos 2",
+          "Redes y Comunicación de Datos 1",
+          "Estadística Inferencial",
+          "Herramientas para la Comunicación Efectiva"
+        ]
+      },
+      {
+        ciclo: 6,
+        cursos: [
+          "Herramientas Informáticas para la Toma de Decisiones",
+          "Interacción Hombre-Máquina",
+          "JavaScript Avanzado",
+          "Análisis y Diseño de Algoritmos",
+          "Curso Integrador 1: Sistemas Software",
+          "Ética Profesional"
+        ]
+      },
+      {
+        ciclo: 7,
+        cursos: [
+          "Nuevas Tecnologías y Tendencias",
+          "Diseño de Productos y Servicios",
+          "Desarrollo Web Integrado",
+          "Curso Integrador 2: Sistemas",
+          "Innovación y Transformación Digital",
+          "Liderazgo y Gestión de Equipos"
+        ]
+      },
+      {
+        ciclo: 8,
+        cursos: [
+          "Gestión del Servicio TI",
+          "Gestión de Proyectos",
+          "Negociación y Narrativa",
+          "Herramientas de Prototipiado",
+          "Electivo 1",
+          "Sistemas de Información Empresarial"
+        ]
+      },
+      {
+        ciclo: 9,
+        cursos: [
+          "Planeamiento Estratégico de las TICs",
+          "Gestión del Conocimiento",
+          "Electivo 2",
+          "Electivo 3",
+          "Prácticas Preprofesionales I",
+          "Taller de Investigación - Sistemas"
+        ]
+      },
+      {
+        ciclo: 10,
+        cursos: [
+          "Diseño e Implementación de Arquitectura Empresarial",
+          "Inteligencia de Negocios",
+          "Electivo 4",
+          "Electivo 5",
+          "Prácticas Preprofesionales II"
+        ]
+      }
+    ];
+
+    const container = document.getElementById("malla");
+
+    malla.forEach(({ ciclo, cursos }) => {
+      const div = document.createElement("div");
+      div.className = "ciclo";
+      div.innerHTML = `<h2>Ciclo ${ciclo}</h2>`;
+      const cursoList = document.createElement("div");
+      cursoList.className = "cursos";
+      cursos.forEach(curso => {
+        const c = document.createElement("div");
+        c.className = "curso";
+        c.textContent = curso;
+        cursoList.appendChild(c);
+      });
+      div.appendChild(cursoList);
+      container.appendChild(div);
+    });
+  </script>
+</body>
+</html>
