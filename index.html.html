@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Malla Interactiva – Ingeniería de Sistemas e Informática</title>
+<style>
+body{font-family:Arial,Helvetica,sans-serif;margin:0;padding:0;background:#f8f9fa;color:#111}
+h2{margin:16px 8px}
+.container{display:flex;overflow-x:auto;padding:16px;gap:24px}
+.cycle{min-width:260px}
+.course{display:flex;align-items:center;justify-content:center;text-align:center;border:2px solid #000;border-radius:12px;min-height:60px;margin:8px 0;padding:8px;cursor:pointer;font-size:0.9rem;background:#e5e5e5;transition:all .2s}
+.course.locked{opacity:0.35;cursor:not-allowed}
+.course.done{background:#000;color:#fff}
+.course.locked:hover{transform:none}
+.course:not(.locked):hover{transform:scale(1.03)}
+.cycle-title{font-weight:bold;text-align:center;margin-bottom:8px;font-size:1.1rem}
+</style>
+</head>
+<body>
+<h2 style="text-align:center">Malla interactiva – Ingeniería de Sistemas e Informática</h2>
+<div class="container" id="grid"></div>
+
+<script>
+// ------- Datos de cursos ----------
+const courses = [
+{ id:'MAT1', name:'Matemática 1', cycle:1, prereqs:[] },
+{ id:'ALG_PRI', name:'Principios de Algoritmos', cycle:1, prereqs:[] },
+{ id:'IND_MA', name:'Individuo y Medio Ambiente', cycle:1, prereqs:[] },
+{ id:'VIDA_UNIV', name:'Introducción a la Vida Universitaria', cycle:1, prereqs:[] },
+{ id:'ING1', name:'Inglés I', cycle:1, prereqs:[] },
+{ id:'TEXT1', name:'Comprensión y Redacción de Textos I', cycle:1, prereqs:[] },
+
+{ id:'EST_DESC', name:'Estadística Descriptiva y Probabilidades', cycle:2, prereqs:['MAT1'] },
+{ id:'PROB_PERU', name:'Problemas y Desafíos en el Perú Actual', cycle:2, prereqs:['IND_MA','TEXT1'] },
+{ id:'MAT2', name:'Matemática 2', cycle:2, prereqs:['MAT1'] },
+{ id:'MAT_DIS', name:'Matemática Discreta', cycle:2, prereqs:['MAT1'] },
+{ id:'ING2', name:'Inglés II', cycle:2, prereqs:['ING1'] },
+{ id:'TEXT2', name:'Comprensión y Redacción II', cycle:2, prereqs:['TEXT1'] },
+{ id:'TIC', name:'Introducción a las TIC', cycle:2, prereqs:['VIDA_UNIV'] },
+
+{ id:'MEC', name:'Mecánica clásica', cycle:3, prereqs:['MAT2'] },
+{ id:'LAB_MEC', name:'Laboratorio de mecánica clásica', cycle:3, prereqs:['MAT2'] },
+{ id:'ING3', name:'Inglés III', cycle:3, prereqs:['ING2'] },
+{ id:'CIUD', name:'Ciudadanía y Reflexión Ética', cycle:3, prereqs:['IND_MA','TEXT1'] },
+{ id:'TALL_PROG', name:'Taller de Programación', cycle:3, prereqs:['TIC','ALG_PRI'] },
+{ id:'CALC1', name:'Cálculo 1', cycle:3, prereqs:['MAT2'] },
+{ id:'EST_INF', name:'Estadística inferencial', cycle:3, prereqs:['EST_DESC'] },
+
+{ id:'AD_ANALG', name:'Análisis y Diseño de Algoritmos', cycle:4, prereqs:['MAT_DIS','TALL_PROG'] },
+{ id:'INV_ACAD', name:'Investigación Académica', cycle:4, prereqs:['IND_MA','TEXT1'] },
+{ id:'ING4', name:'Inglés IV', cycle:4, prereqs:['ING3'] },
+{ id:'CALC2', name:'Cálculo 2', cycle:4, prereqs:['CALC1'] },
+{ id:'POO', name:'Programación Orientada a Objetos', cycle:4, prereqs:['TALL_PROG'] },
+{ id:'BD1', name:'Base de Datos I', cycle:4, prereqs:['TALL_PROG'] },
+{ id:'ELEM', name:'Fundamentos de electromagnetismo', cycle:4, prereqs:['CALC1','MEC'] },
+{ id:'LAB_ELEM', name:'Laboratorio de electromagnetismo', cycle:4, prereqs:['CALC1','LAB_MEC'] },
+
+{ id:'HERR_DEC', name:'Herr. Informáticas p/Decisiones', cycle:5, prereqs:[] },
+{ id:'DIS_PAT', name:'Diseño de Patrones', cycle:5, prereqs:['BD1','POO'] },
+{ id:'BD2', name:'Base de Datos II', cycle:5, prereqs:['BD1'] },
+{ id:'REDES1', name:'Redes y Comunicación de Datos I', cycle:5, prereqs:['POO'] },
+{ id:'WEB_TALL', name:'Taller de Programación Web', cycle:5, prereqs:['BD1'] },
+{ id:'SO', name:'Sistemas Operativos', cycle:5, prereqs:['BD1'] },
+{ id:'ALGO_ED', name:'Algoritmos y Estructuras de Datos', cycle:5, prereqs:['AD_ANALG','POO'] },
+
+{ id:'CSS_AV', name:'Hojas de Estilo en Cascada Avanzado', cycle:6, prereqs:['WEB_TALL'] },
+{ id:'MARCOS_WEB', name:'Marcos de Desarrollo Web', cycle:6, prereqs:['WEB_TALL'] },
+{ id:'JS_AV', name:'JavaScript Avanzado', cycle:6, prereqs:['WEB_TALL'] },
+{ id:'GES_PROY', name:'Gestión de Proyectos', cycle:6, prereqs:['HERR_DEC'] },
+{ id:'ADM_EMP', name:'Adm. y Org. de Empresas', cycle:6, prereqs:[] },
+{ id:'AD_SI', name:'Análisis y Diseño de SI', cycle:6, prereqs:['ALGO_ED'] },
+{ id:'CI1', name:'Curso Integrador I', cycle:6, prereqs:['ALGO_ED'] },
+
+{ id:'DW_INT', name:'Desarrollo Web Integrado', cycle:7, prereqs:['CSS_AV','MARCOS_WEB','JS_AV'] },
+{ id:'SEG_INF', name:'Seguridad Informática', cycle:7, prereqs:['REDES1'] },
+{ id:'HERR_DEV', name:'Herramientas de Desarrollo', cycle:7, prereqs:['CSS_AV','MARCOS_WEB','JS_AV'] },
+{ id:'TEORIA_SIS', name:'Teoría de Sistemas', cycle:7, prereqs:['ALGO_ED','TIC'] },
+{ id:'LENG_PROG', name:'Lenguajes de Programación', cycle:7, prereqs:['ALGO_ED'] },
+{ id:'DIS_PROD', name:'Diseño de Productos y Servicios', cycle:7, prereqs:['ADM_EMP'] },
+{ id:'LID_EQU', name:'Liderazgo y Gestión de Equipos', cycle:7, prereqs:['ADM_EMP'] },
+
+{ id:'PROT', name:'Herramientas de Prototipado', cycle:8, prereqs:['DIS_PROD'] },
+{ id:'GES_SRV_TI', name:'Gestión del Servicio TI', cycle:8, prereqs:['AD_SI'] },
+{ id:'NEG_NARR', name:'Negociación y Narrativa', cycle:8, prereqs:['ADM_EMP'] },
+{ id:'INNO_TD', name:'Innovación y Transformación Digital', cycle:8, prereqs:['AD_SI'] },
+{ id:'COM_EFEC', name:'Herr. Comunicación Efectiva', cycle:8, prereqs:['CI1'] },
+{ id:'ARQ_EMP', name:'Arquitectura Empresarial', cycle:8, prereqs:['AD_SI'] },
+{ id:'INT_NEG', name:'Inteligencia de Negocios', cycle:8, prereqs:['HERR_DEV','BD2'] },
+
+{ id:'IHM', name:'Interacción Hombre Máquina', cycle:9, prereqs:['DIS_PROD','AD_SI'] },
+{ id:'GES_CONOC', name:'Gestión del Conocimiento', cycle:9, prereqs:['INT_NEG'] },
+{ id:'PLAN_TIC', name:'Planeamiento Estratégico TIC', cycle:9, prereqs:['ARQ_EMP'] },
+{ id:'SI_EMP', name:'Sistemas de Información Empresarial', cycle:9, prereqs:['AD_SI','ADM_EMP'] },
+{ id:'CI2', name:'Curso Integrador II', cycle:9, prereqs:['INT_NEG','ARQ_EMP','CI1'] },
+{ id:'FORM_INV', name:'Formación para la Investigación', cycle:9, prereqs:['TEXT2','INV_ACAD','CI1'] },
+
+{ id:'CLOUD', name:'Servicios Cloud', cycle:10, prereqs:['REDES1'] },
+{ id:'NUEVAS_TECS', name:'Nuevas Tecnologías y Tendencias', cycle:10, prereqs:['INNO_TD'] },
+{ id:'ING_ECO', name:'Ingeniería Económica', cycle:10, prereqs:['SI_EMP'] },
+{ id:'EMP', name:'Formación para la Empleabilidad', cycle:10, prereqs:['COM_EFEC'] },
+{ id:'ETICA', name:'Ética Profesional', cycle:10, prereqs:['FORM_INV'] },
+{ id:'TALL_INV', name:'Taller de Investigación', cycle:10, prereqs:['FORM_INV'] },
+{ id:'APPS_MOV', name:'Desarrollo de Aplicaciones Móviles', cycle:10, prereqs:['AD_SI'] },
+{ id:'DES_SW', name:'Desarrollo de Software', cycle:10, prereqs:['AD_SI'] },
+];
+
+// ----------- State -------------
+const saved = JSON.parse(localStorage.getItem('status')||'{}');
+const status = {...saved}; // id -> 'done'
+
+// ----------- Helpers -----------
+function isUnlocked(course){
+  return course.prereqs.every(p=>status[p]==='done');
+}
+function render(){
+  const grid = document.getElementById('grid');
+  grid.innerHTML = '';
+  for(let cycle=1;cycle<=10;cycle++){
+    const col = document.createElement('div');
+    col.className='cycle';
+    const title = document.createElement('div');
+    title.textContent = cycle+'º ciclo';
+    title.className='cycle-title';
+    col.appendChild(title);
+    courses.filter(c=>c.cycle===cycle).forEach(course=>{
+      const btn = document.createElement('div');
+      btn.className='course';
+      btn.textContent = course.name;
+      const unlocked = isUnlocked(course);
+      if(!unlocked) btn.classList.add('locked');
+      if(status[course.id]==='done') btn.classList.add('done');
+      btn.addEventListener('click',()=>{
+        if(!isUnlocked(course)) return;
+        if(status[course.id]==='done'){
+          delete status[course.id];
+        } else {
+          status[course.id]='done';
+        }
+        localStorage.setItem('status',JSON.stringify(status));
+        render();
+      });
+      col.appendChild(btn);
+    });
+    grid.appendChild(col);
+  }
+}
+window.addEventListener('DOMContentLoaded',render);
+</script>
+</body>
+</html>
