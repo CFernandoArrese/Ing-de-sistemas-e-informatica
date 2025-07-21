@@ -1,160 +1,218 @@
+<!--
+  Malla interactiva – Ingeniería de Sistemas e Informática
+  • Solo HTML + CSS + JavaScript (sin frameworks)
+  • Botones grandes negros / grises
+  • Bloqueo y desbloqueo automático por prerrequisito
+  • Clic para aprobar o des‑aprobar un curso
+  • Progreso persistente en localStorage
+-->
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <title>Malla Interactiva Horizontal – 10 Ciclos</title>
-  <style>
-    body{font-family:'Segoe UI',sans-serif;background:#f5f6fa;margin:0;padding:20px;color:#2c3e50}
-    h1{text-align:center;color:#1c1c1c;margin-top:0}
-    .fila-ciclos{display:flex;gap:20px;overflow-x:auto;padding:20px 0}
-    .ciclo{flex:0 0 360px;background:#fff;border-radius:10px;padding:20px;box-shadow:0 2px 10px rgba(0,0,0,.1)}
-    .ciclo h2{border-left:6px solid #000;padding-left:12px;color:#000;margin:0 0 16px}
-    .curso{margin:10px 0;padding:14px;border-radius:8px;border:2px solid transparent;width:100%;text-align:center;font-size:15px;font-weight:bold;cursor:pointer;transition:.3s}
-    .bloqueado{background:#333;color:#aaa;cursor:not-allowed}
-    .activo{background:#fff;color:#000;border-color:#000}
-    .activo:hover{background:#000;color:#fff}
-    .completado{background:#27ae60;color:#fff;text-decoration:line-through}
-  </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Malla Interactiva – ISI</title>
+<style>
+:root{
+  --locked-bg:#d1d5db;          /* gris claro */
+  --locked-text:#6b7280;        /* gris oscuro */
+  --unlocked-bg:#ffffff;        /* blanco */
+  --unlocked-text:#000000;      /* negro */
+  --completed-bg:#000000;       /* negro sólido */
+  --completed-text:#ffffff;     /* blanco */
+  --btn-radius:1.25rem;
+}
+*{box-sizing:border-box;font-family:system-ui,sans-serif}
+body{margin:0;padding:1rem;background:#f5f5f5;color:#111}
+h2{margin:.5rem 0}
+#board{
+  display:flex;
+  gap:1.5rem;
+  overflow-x:auto;
+  padding-bottom:1rem;
+}
+.cycle{
+  min-width:260px;
+  background:#fff;
+  border-radius:var(--btn-radius);
+  padding:1rem;
+  box-shadow:0 2px 6px rgb(0 0 0 / .12);
+}
+.course{
+  width:100%;
+  margin:.4rem 0;
+  padding:.75rem 1rem;
+  border:none;
+  border-radius:var(--btn-radius);
+  font-size:.9rem;
+  line-height:1.2;
+  cursor:pointer;
+  transition:transform .15s;
+}
+.course:active{transform:scale(.97)}
+.course.locked{
+  background:var(--locked-bg);
+  color:var(--locked-text);
+  cursor:not-allowed;
+}
+.course.unlocked{
+  background:var(--unlocked-bg);
+  color:var(--unlocked-text);
+  border:2px solid var(--unlocked-text);
+}
+.course.completed{
+  background:var(--completed-bg);
+  color:var(--completed-text);
+}
+</style>
 </head>
 <body>
-  <h1>Malla Interactiva Horizontal – Ingeniería de Sistemas e Informática</h1>
-  <div class="fila-ciclos" id="contenedor"></div>
 
-  <script>
-    /* ------------- Datos ------------- */
-    const cursos={
-      "CICLO 01":[
-        {n:"PRINCIPIOS DE ALGORITMOS"},
-        {n:"INTRODUCCIÓN A LA VIDA UNIVERSITARIA"},
-        {n:"MATEMÁTICA 1"},
-        {n:"COMPRENSIÓN Y REDACCIÓN DE TEXTOS 1"},
-        {n:"INDIVIDUO Y MEDIO AMBIENTE"},
-        {n:"INGLÉS 1"}
-      ],
-      "CICLO 02":[
-        {n:"INTRODUCCIÓN A LAS TIC",pre:["INTRODUCCIÓN A LA VIDA UNIVERSITARIA"]},
-        {n:"MATEMÁTICA DISCRETA",pre:["MATEMÁTICA 1"]},
-        {n:"MATEMÁTICA 2",pre:["MATEMÁTICA 1"]},
-        {n:"PROBLEMAS Y DESAFÍOS EN EL PERÚ ACTUAL"},
-        {n:"ESTADÍSTICA DESCRIPTIVA Y PROBABILIDADES"},
-        {n:"COMPRENSIÓN Y REDACCIÓN DE TEXTOS 2",pre:["COMPRENSIÓN Y REDACCIÓN DE TEXTOS 1"]},
-        {n:"INGLÉS 2",pre:["INGLÉS 1"]}
-      ],
-      "CICLO 03":[
-        {n:"TALLER DE PROGRAMACIÓN",pre:["PRINCIPIOS DE ALGORITMOS","INTRODUCCIÓN A LAS TIC"]},
-        {n:"CIUDADANÍA Y REFLEXIÓN ÉTICA",pre:["INDIVIDUO Y MEDIO AMBIENTE"]},
-        {n:"CÁLCULO 1",pre:["MATEMÁTICA 2"]},
-        {n:"ESTADÍSTICA INFERENCIAL",pre:["MATEMÁTICA 2"]},
-        {n:"MECÁNICA CLÁSICA",pre:["MATEMÁTICA 2"]},
-        {n:"LABORATORIO DE MECÁNICA CLÁSICA",pre:["MECÁNICA CLÁSICA"]},
-        {n:"INGLÉS 3",pre:["INGLÉS 2"]}
-      ],
-      "CICLO 04":[
-        {n:"PROGRAMACIÓN ORIENTADA A OBJETOS",pre:["TALLER DE PROGRAMACIÓN"]},
-        {n:"ANÁLISIS Y DISEÑO DE ALGORITMOS",pre:["TALLER DE PROGRAMACIÓN"]},
-        {n:"CÁLCULO 2",pre:["CÁLCULO 1"]},
-        {n:"INVESTIGACIÓN ACADÉMICA",pre:["COMPRENSIÓN Y REDACCIÓN DE TEXTOS 2"]},
-        {n:"BASE DE DATOS 1",pre:["TALLER DE PROGRAMACIÓN"]},
-        {n:"FUNDAMENTOS DE ELECTROMAGNETISMO",pre:["MECÁNICA CLÁSICA"]},
-        {n:"LABORATORIO DE FUNDAMENTOS DE ELECTROMAGNETISMO",pre:["FUNDAMENTOS DE ELECTROMAGNETISMO"]},
-        {n:"INGLÉS 4",pre:["INGLÉS 3"]}
-      ],
-      "CICLO 05":[
-        {n:"ALGORITMOS Y ESTRUCTURA DE DATOS",pre:["PROGRAMACIÓN ORIENTADA A OBJETOS"]},
-        {n:"DISEÑO DE PATRONES",pre:["ALGORITMOS Y ESTRUCTURA DE DATOS"]},
-        {n:"TALLER DE PROGRAMACIÓN WEB",pre:["BASE DE DATOS 1"]},
-        {n:"REDES Y COMUNICACIÓN DE DATOS 1",pre:["PROGRAMACIÓN ORIENTADA A OBJETOS"]},
-        {n:"SISTEMAS OPERATIVOS",pre:["BASE DE DATOS 1"]},
-        {n:"HERRAMIENTAS INFORMÁTICAS PARA LA TOMA DE DECISIONES"},
-        {n:"BASE DE DATOS 2",pre:["BASE DE DATOS 1"]}
-      ],
-      "CICLO 06":[
-        {n:"ANÁLISIS Y DISEÑO DE SISTEMAS DE INFORMACIÓN",pre:["ALGORITMOS Y ESTRUCTURA DE DATOS"]},
-        {n:"JAVA SCRIPT AVANZADO",pre:["TALLER DE PROGRAMACIÓN WEB"]},
-        {n:"MARCOS DE DESARROLLO WEB",pre:["TALLER DE PROGRAMACIÓN WEB"]},
-        {n:"HOJA DE ESTILO EN CASCADA AVANZADO",pre:["TALLER DE PROGRAMACIÓN WEB"]},
-        {n:"GESTIÓN DE PROYECTOS"},
-        {n:"ADMINISTRACIÓN Y ORGANIZACIÓN DE EMPRESAS"},
-        {n:"CURSO INTEGRADOR 1: SISTEMAS SOFTWARE",pre:["ANÁLISIS Y DISEÑO DE SISTEMAS DE INFORMACIÓN"]}
-      ],
-      "CICLO 07":[
-        {n:"LENGUAJES DE PROGRAMACIÓN",pre:["ALGORITMOS Y ESTRUCTURA DE DATOS"]},
-        {n:"TEORÍA DE SISTEMAS"},
-        {n:"DISEÑO DE PRODUCTOS Y SERVICIOS"},
-        {n:"DESARROLLO WEB INTEGRADO",pre:["JAVA SCRIPT AVANZADO","MARCOS DE DESARROLLO WEB"]},
-        {n:"HERRAMIENTAS DE DESARROLLO",pre:["MARCOS DE DESARROLLO WEB"]},
-        {n:"LIDERAZGO Y GESTIÓN DE EQUIPOS"},
-        {n:"SEGURIDAD INFORMÁTICA",pre:["REDES Y COMUNICACIÓN DE DATOS 1"]}
-      ],
-      "CICLO 08":[
-        {n:"HERRAMIENTAS PARA LA COMUNICACIÓN EFECTIVA"},
-        {n:"INNOVACIÓN Y TRANSFORMACIÓN DIGITAL"},
-        {n:"HERRAMIENTAS DE PROTOTIPADO"},
-        {n:"NEGOCIACIÓN Y NARRATIVA"},
-        {n:"DISEÑO E IMPLEMENTACIÓN DE ARQUITECTURA EMPRESARIAL",pre:["ANÁLISIS Y DISEÑO DE SISTEMAS DE INFORMACIÓN"]},
-        {n:"GESTIÓN DEL SERVICIO TI"},
-        {n:"INTELIGENCIA DE NEGOCIOS",pre:["BASE DE DATOS 2","HERRAMIENTAS DE DESARROLLO"]}
-      ],
-      "CICLO 09":[
-        {n:"FORMACIÓN PARA LA INVESTIGACIÓN - SISTEMAS"},
-        {n:"INTERACCIÓN HOMBRE MÁQUINA",pre:["LENGUAJES DE PROGRAMACIÓN"]},
-        {n:"CURSO INTEGRADOR 2: SISTEMAS",pre:["INTELIGENCIA DE NEGOCIOS","DISEÑO E IMPLEMENTACIÓN DE ARQUITECTURA EMPRESARIAL"]},
-        {n:"PLANEAMIENTO ESTRATÉGICO DE LAS TICS"},
-        {n:"SISTEMAS DE INFORMACIÓN EMPRESARIAL",pre:["ANÁLISIS Y DISEÑO DE SISTEMAS DE INFORMACIÓN"]},
-        {n:"GESTIÓN DEL CONOCIMIENTO"}
-      ],
-      "CICLO 10":[
-        {n:"ÉTICA PROFESIONAL"},
-        {n:"NUEVAS TECNOLOGÍAS Y TENDENCIAS"},
-        {n:"FORMACIÓN PARA LA EMPLEABILIDAD"},
-        {n:"SERVICIOS CLOUD",pre:["REDES Y COMUNICACIÓN DE DATOS 1"]},
-        {n:"INGENIERÍA ECONÓMICA"},
-        {n:"TALLER DE INVESTIGACIÓN - SISTEMAS",pre:["FORMACIÓN PARA LA INVESTIGACIÓN - SISTEMAS"]},
-        {n:"ELECTIVO 1"}
-      ]
-    };
+<h1>Malla Interactiva – Ingeniería de Sistemas e Informática</h1>
+<p>Haz clic en cada curso cuando lo apruebes; se desbloquearán los que dependan de él. Vuelve a hacer clic para revertir.</p>
 
-    /* ---------- Estado ---------- */
-    const estado=JSON.parse(localStorage.getItem('estadoCursos')||'{}');
-    const cont=document.getElementById('contenedor');
+<div id="board"></div>
 
-    function save(){localStorage.setItem('estadoCursos',JSON.stringify(estado));}
+<script>
+// ---------- Datos de los cursos ----------
+const courses = [
+  // Ciclo 1
+  {id:'MAT1',name:'Matemática 1',cycle:1,prereqs:[]},
+  {id:'ALG_PRI',name:'Principios de Algoritmos',cycle:1,prereqs:[]},
+  {id:'IND_MED',name:'Individuo y Medio Ambiente',cycle:1,prereqs:[]},
+  {id:'VIDA_UNI',name:'Introducción a la Vida Universitaria',cycle:1,prereqs:[]},
+  {id:'ING1',name:'Inglés I',cycle:1,prereqs:[]},
+  {id:'CRT1',name:'Comprensión y Redacción de Textos I',cycle:1,prereqs:[]},
 
-    function reqOK(req=[]){return req.every(r=>estado[r]);}
+  // Ciclo 2
+  {id:'EST_DESC',name:'Estadística Descriptiva y Probabilidades',cycle:2,prereqs:['MAT1']},
+  {id:'PERU_PROB',name:'Problemas y Desafíos en el Perú Actual',cycle:2,prereqs:['IND_MED','CRT1']},
+  {id:'MAT2',name:'Matemática 2',cycle:2,prereqs:['MAT1']},
+  {id:'MAT_DIS',name:'Matemática Discreta',cycle:2,prereqs:['MAT1']},
+  {id:'ING2',name:'Inglés II',cycle:2,prereqs:['ING1']},
+  {id:'CRT2',name:'Comprensión y Redacción II',cycle:2,prereqs:['CRT1']},
+  {id:'TIC_INTRO',name:'Introducción a las TIC',cycle:2,prereqs:['VIDA_UNI']},
 
-    function pinta(btn,curso){
-      btn.className='curso';
-      const completo=estado[curso.n];
-      const activo=!completo&&reqOK(curso.pre);
-      if(completo){
-        btn.classList.add('completado');
-        btn.textContent='✅ '+(curso.alias||curso.n);
-      }else if(activo){
-        btn.classList.add('activo');
+  // Ciclo 3
+  {id:'MEC',name:'Mecánica Clásica',cycle:3,prereqs:['MAT2']},
+  {id:'LAB_MEC',name:'Laboratorio de Mecánica Clásica',cycle:3,prereqs:['MAT2']},
+  {id:'ING3',name:'Inglés III',cycle:3,prereqs:['ING2']},
+  {id:'CIUD_ETICA',name:'Ciudadanía y Reflexión Ética',cycle:3,prereqs:['IND_MED','CRT1']},
+  {id:'TALL_PROG',name:'Taller de Programación',cycle:3,prereqs:['TIC_INTRO','ALG_PRI']},
+  {id:'CAL1',name:'Cálculo 1',cycle:3,prereqs:['MAT2']},
+  {id:'EST_INF',name:'Estadística Inferencial',cycle:3,prereqs:['EST_DESC']},
+
+  // Ciclo 4
+  {id:'ADS_ALG',name:'Análisis y Diseño de Algoritmos',cycle:4,prereqs:['MAT_DIS','TALL_PROG']},
+  {id:'INV_ACAD',name:'Investigación Académica',cycle:4,prereqs:['IND_MED','CRT1']},
+  {id:'ING4',name:'Inglés IV',cycle:4,prereqs:['ING3']},
+  {id:'CAL2',name:'Cálculo 2',cycle:4,prereqs:['CAL1']},
+  {id:'POO',name:'Programación Orientada a Objetos',cycle:4,prereqs:['TALL_PROG']},
+  {id:'BD1',name:'Base de Datos I',cycle:4,prereqs:['TALL_PROG']},
+  {id:'EMAG_FUN',name:'Fundamentos de Electromagnetismo',cycle:4,prereqs:['CAL1','MEC']},
+  {id:'LAB_EMAG',name:'Laboratorio de Electromagnetismo',cycle:4,prereqs:['CAL1','LAB_MEC']},
+
+  // Ciclo 5
+  {id:'HERR_DEC',name:'Herramientas Informáticas para la Toma de Decisiones',cycle:5,prereqs:[]},
+  {id:'DIS_PAT',name:'Diseño de Patrones',cycle:5,prereqs:['BD1','POO']},
+  {id:'BD2',name:'Base de Datos II',cycle:5,prereqs:['BD1']},
+  {id:'REDES1',name:'Redes y Comunicación de Datos I',cycle:5,prereqs:['POO']},
+  {id:'TALL_WEB',name:'Taller de Programación Web',cycle:5,prereqs:['BD1']},
+  {id:'SO',name:'Sistemas Operativos',cycle:5,prereqs:['BD1']},
+  {id:'AED',name:'Algoritmos y Estructuras de Datos',cycle:5,prereqs:['ADS_ALG','POO']},
+
+  // Ciclo 6
+  {id:'CSS_ADV',name:'Hojas de Estilo en Cascada Avanzado',cycle:6,prereqs:['TALL_WEB']},
+  {id:'FRAME_WEB',name:'Marcos de Desarrollo Web',cycle:6,prereqs:['TALL_WEB']},
+  {id:'JS_ADV',name:'JavaScript Avanzado',cycle:6,prereqs:['TALL_WEB']},
+  {id:'GEST_PROY',name:'Gestión de Proyectos',cycle:6,prereqs:['HERR_DEC']},
+  {id:'ADM_EMP',name:'Administración y Organización de Empresas',cycle:6,prereqs:[]},
+  {id:'ADSI',name:'Análisis y Diseño de Sistemas de Información',cycle:6,prereqs:['AED']},
+  {id:'CUR_INT1',name:'Curso Integrador I',cycle:6,prereqs:['AED']},
+
+  // Ciclo 7
+  {id:'WEB_INT',name:'Desarrollo Web Integrado',cycle:7,prereqs:['CSS_ADV','FRAME_WEB','JS_ADV']},
+  {id:'SEG_INF',name:'Seguridad Informática',cycle:7,prereqs:['REDES1']},
+  {id:'HERR_DEV',name:'Herramientas de Desarrollo',cycle:7,prereqs:['CSS_ADV','FRAME_WEB','JS_ADV']},
+  {id:'TEOR_SIS',name:'Teoría de Sistemas',cycle:7,prereqs:['AED','TIC_INTRO']},
+  {id:'LEN_PROG',name:'Lenguajes de Programación',cycle:7,prereqs:['AED']},
+  {id:'DIS_PROD',name:'Diseño de Productos y Servicios',cycle:7,prereqs:['ADM_EMP']},
+  {id:'LID_EQ',name:'Liderazgo y Gestión de Equipos',cycle:7,prereqs:['ADM_EMP']},
+
+  // Ciclo 8
+  {id:'HERR_PROTO',name:'Herramientas de Prototipado',cycle:8,prereqs:['DIS_PROD']},
+  {id:'GEST_SERV_TI',name:'Gestión del Servicio TI',cycle:8,prereqs:['ADSI']},
+  {id:'NEG_NAR',name:'Negociación y Narrativa',cycle:8,prereqs:['ADM_EMP']},
+  {id:'INNOV_TD',name:'Innovación y Transformación Digital',cycle:8,prereqs:['ADSI']},
+  {id:'COM_EFE',name:'Herramientas para la Comunicación Efectiva',cycle:8,prereqs:['CUR_INT1']},
+  {id:'ARQ_EMP',name:'Arquitectura Empresarial',cycle:8,prereqs:['ADSI']},
+  {id:'INT_NEG',name:'Inteligencia de Negocios',cycle:8,prereqs:['HERR_DEV','BD2']},
+
+  // Ciclo 9
+  {id:'IHM',name:'Interacción Hombre‑Máquina',cycle:9,prereqs:['DIS_PROD','ADSI']},
+  {id:'GEST_CON',name:'Gestión del Conocimiento',cycle:9,prereqs:['INT_NEG']},
+  {id:'PLAN_ESTR_TIC',name:'Planeamiento Estratégico de las TIC',cycle:9,prereqs:['ARQ_EMP']},
+  {id:'SI_EMP',name:'Sistemas de Información Empresarial',cycle:9,prereqs:['ADSI','ADM_EMP']},
+  {id:'CUR_INT2',name:'Curso Integrador II',cycle:9,prereqs:['INT_NEG','ARQ_EMP','CUR_INT1']},
+  {id:'FOR_INV',name:'Formación para la Investigación',cycle:9,prereqs:['CRT2','INV_ACAD','CUR_INT1']},
+
+  // Ciclo 10
+  {id:'CLOUD_SERV',name:'Servicios Cloud',cycle:10,prereqs:['REDES1']},
+  {id:'NUEV_TEC',name:'Nuevas Tecnologías y Tendencias',cycle:10,prereqs:['INNOV_TD']},
+  {id:'ING_ECON',name:'Ingeniería Económica',cycle:10,prereqs:['SI_EMP']},
+  {id:'EMP',name:'Formación para la Empleabilidad',cycle:10,prereqs:['COM_EFE']},
+  {id:'ETICA_PROF',name:'Ética Profesional',cycle:10,prereqs:['FOR_INV']},
+  {id:'TALL_INV',name:'Taller de Investigación',cycle:10,prereqs:['FOR_INV']},
+  {id:'DEV_MOV',name:'Desarrollo de Aplicaciones Móviles',cycle:10,prereqs:['ADSI']},
+  {id:'DEV_SOFT',name:'Desarrollo de Software',cycle:10,prereqs:['ADSI']}
+];
+
+// ---------- Estado ----------
+const storageKey='isi-progress';
+let completed=new Set(JSON.parse(localStorage.getItem(storageKey)||'[]'));
+
+// ---------- Utilidades ----------
+const isUnlocked=course=>course.prereqs.every(p=>completed.has(p));
+const toggleCourse=id=>{
+  if(completed.has(id)){completed.delete(id);}else{completed.add(id);}
+  localStorage.setItem(storageKey,JSON.stringify([...completed]));
+  render();
+};
+
+// ---------- Render ----------
+function render(){
+  const board=document.getElementById('board');
+  board.innerHTML='';
+  for(let cycle=1;cycle<=10;cycle++){
+    const col=document.createElement('div');
+    col.className='cycle';
+    const h=document.createElement('h2');
+    h.textContent=`${cycle}.º ciclo`;
+    col.appendChild(h);
+
+    courses.filter(c=>c.cycle===cycle).forEach(c=>{
+      const btn=document.createElement('button');
+      btn.className='course';
+      btn.textContent=c.name;
+      const locked=!isUnlocked(c);
+      if(completed.has(c.id)){
+        btn.classList.add('completed');
+      }else if(locked){
+        btn.classList.add('locked');
       }else{
-        btn.classList.add('bloqueado');btn.disabled=true;
+        btn.classList.add('unlocked');
       }
-    }
-
-    /* ---------- Render ---------- */
-    Object.entries(cursos).forEach(([ciclo,lista])=>{
-      const bloc=document.createElement('div');bloc.className='ciclo';
-      bloc.innerHTML=`<h2>${ciclo}</h2>`;
-      lista.forEach(cur=>{
-        const btn=document.createElement('button');btn.textContent=cur.alias||cur.n;
-        pinta(btn,cur);
-        btn.onclick=()=>{
-          if(btn.classList.contains('bloqueado'))return;
-          estado[cur.n]=!estado[cur.n];save();
-          document.querySelectorAll('.curso').forEach((b,i)=>{      // repintar todo
-            const cList=Object.values(cursos).flat()[i];
-            pinta(b,cList);
-          });
-        };
-        bloc.appendChild(btn);
-      });
-      cont.appendChild(bloc);
+      btn.disabled=locked;
+      btn.onclick=()=>toggleCourse(c.id);
+      col.appendChild(btn);
     });
-  </script>
+    board.appendChild(col);
+  }
+}
+
+render();
+</script>
+
 </body>
 </html>
