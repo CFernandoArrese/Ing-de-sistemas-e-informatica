@@ -1,83 +1,53 @@
 <!--
-  Malla interactiva – Ingeniería de Sistemas e Informática
-  • Solo HTML + CSS + JavaScript (sin frameworks)
-  • Botones grandes negros / grises
-  • Bloqueo y desbloqueo automático por prerrequisito
-  • Clic para aprobar o des‑aprobar un curso
-  • Progreso persistente en localStorage
+  Malla Interactiva – Ingeniería de Sistemas e Informática
+  (HTML + CSS + JavaScript puro)
+  • Botones grandes con paleta que incluye negro
+  • Bloqueo / desbloqueo según prerrequisitos
+  • Clic para aprobar o des‑aprobar
+  • Progreso guardado en localStorage
 -->
 
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Malla Interactiva – ISI</title>
-<style>
-:root{
-  --locked-bg:#d1d5db;          /* gris claro */
-  --locked-text:#6b7280;        /* gris oscuro */
-  --unlocked-bg:#ffffff;        /* blanco */
-  --unlocked-text:#000000;      /* negro */
-  --completed-bg:#000000;       /* negro sólido */
-  --completed-text:#ffffff;     /* blanco */
-  --btn-radius:1.25rem;
-}
-*{box-sizing:border-box;font-family:system-ui,sans-serif}
-body{margin:0;padding:1rem;background:#f5f5f5;color:#111}
-h2{margin:.5rem 0}
-#board{
-  display:flex;
-  gap:1.5rem;
-  overflow-x:auto;
-  padding-bottom:1rem;
-}
-.cycle{
-  min-width:260px;
-  background:#fff;
-  border-radius:var(--btn-radius);
-  padding:1rem;
-  box-shadow:0 2px 6px rgb(0 0 0 / .12);
-}
-.course{
-  width:100%;
-  margin:.4rem 0;
-  padding:.75rem 1rem;
-  border:none;
-  border-radius:var(--btn-radius);
-  font-size:.9rem;
-  line-height:1.2;
-  cursor:pointer;
-  transition:transform .15s;
-}
-.course:active{transform:scale(.97)}
-.course.locked{
-  background:var(--locked-bg);
-  color:var(--locked-text);
-  cursor:not-allowed;
-}
-.course.unlocked{
-  background:var(--unlocked-bg);
-  color:var(--unlocked-text);
-  border:2px solid var(--unlocked-text);
-}
-.course.completed{
-  background:var(--completed-bg);
-  color:var(--completed-text);
-}
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Malla Interactiva – ISI</title>
+  <style>
+    :root{
+      --locked-bg:#d1d5db;      /* gris claro */
+      --locked-text:#6b7280;    /* gris medio */
+      --unlocked-bg:#ffffff;    /* blanco */
+      --unlocked-text:#000000;  /* negro */
+      --completed-bg:#000000;   /* negro sólido */
+      --completed-text:#ffffff; /* blanco */
+      --radius:1.25rem;
+    }
+    *{box-sizing:border-box;font-family:system-ui,sans-serif;margin:0;padding:0}
+    body{background:#f5f5f5;padding:1rem;color:#111}
+    h1{margin-bottom:.5rem;font-size:1.4rem}
+    p{margin-bottom:1rem;font-size:.9rem}
+    #board{display:flex;gap:1.5rem;overflow-x:auto;padding-bottom:1rem}
+    .cycle{min-width:260px;background:#fff;border-radius:var(--radius);padding:1rem;box-shadow:0 2px 6px rgba(0,0,0,.12)}
+    .cycle h2{font-size:1rem;margin-bottom:.5rem}
+    .course{width:100%;margin:.4rem 0;padding:.75rem 1rem;border:none;border-radius:var(--radius);font-size:.85rem;line-height:1.2;transition:transform .15s}
+    .course:active{transform:scale(.97)}
+    .locked{background:var(--locked-bg);color:var(--locked-text);cursor:not-allowed}
+    .unlocked{background:var(--unlocked-bg);color:var(--unlocked-text);border:2px solid var(--unlocked-text);cursor:pointer}
+    .completed{background:var(--completed-bg);color:var(--completed-text);cursor:pointer}
+  </style>
 </head>
 <body>
 
 <h1>Malla Interactiva – Ingeniería de Sistemas e Informática</h1>
-<p>Haz clic en cada curso cuando lo apruebes; se desbloquearán los que dependan de él. Vuelve a hacer clic para revertir.</p>
+<p>Clic en un curso para marcarlo como aprobado (o des‑aprobado). Los prerrequisitos controlan el bloqueo y tu progreso se guarda en el navegador.</p>
 
 <div id="board"></div>
 
 <script>
-// ---------- Datos de los cursos ----------
-const courses = [
-  // Ciclo 1
+/* ----- Definición de cursos ----- */
+const courses=[
+  /* Ciclo 1 */
   {id:'MAT1',name:'Matemática 1',cycle:1,prereqs:[]},
   {id:'ALG_PRI',name:'Principios de Algoritmos',cycle:1,prereqs:[]},
   {id:'IND_MED',name:'Individuo y Medio Ambiente',cycle:1,prereqs:[]},
@@ -85,7 +55,7 @@ const courses = [
   {id:'ING1',name:'Inglés I',cycle:1,prereqs:[]},
   {id:'CRT1',name:'Comprensión y Redacción de Textos I',cycle:1,prereqs:[]},
 
-  // Ciclo 2
+  /* Ciclo 2 */
   {id:'EST_DESC',name:'Estadística Descriptiva y Probabilidades',cycle:2,prereqs:['MAT1']},
   {id:'PERU_PROB',name:'Problemas y Desafíos en el Perú Actual',cycle:2,prereqs:['IND_MED','CRT1']},
   {id:'MAT2',name:'Matemática 2',cycle:2,prereqs:['MAT1']},
@@ -94,7 +64,7 @@ const courses = [
   {id:'CRT2',name:'Comprensión y Redacción II',cycle:2,prereqs:['CRT1']},
   {id:'TIC_INTRO',name:'Introducción a las TIC',cycle:2,prereqs:['VIDA_UNI']},
 
-  // Ciclo 3
+  /* Ciclo 3 */
   {id:'MEC',name:'Mecánica Clásica',cycle:3,prereqs:['MAT2']},
   {id:'LAB_MEC',name:'Laboratorio de Mecánica Clásica',cycle:3,prereqs:['MAT2']},
   {id:'ING3',name:'Inglés III',cycle:3,prereqs:['ING2']},
@@ -103,7 +73,7 @@ const courses = [
   {id:'CAL1',name:'Cálculo 1',cycle:3,prereqs:['MAT2']},
   {id:'EST_INF',name:'Estadística Inferencial',cycle:3,prereqs:['EST_DESC']},
 
-  // Ciclo 4
+  /* Ciclo 4 */
   {id:'ADS_ALG',name:'Análisis y Diseño de Algoritmos',cycle:4,prereqs:['MAT_DIS','TALL_PROG']},
   {id:'INV_ACAD',name:'Investigación Académica',cycle:4,prereqs:['IND_MED','CRT1']},
   {id:'ING4',name:'Inglés IV',cycle:4,prereqs:['ING3']},
@@ -113,7 +83,7 @@ const courses = [
   {id:'EMAG_FUN',name:'Fundamentos de Electromagnetismo',cycle:4,prereqs:['CAL1','MEC']},
   {id:'LAB_EMAG',name:'Laboratorio de Electromagnetismo',cycle:4,prereqs:['CAL1','LAB_MEC']},
 
-  // Ciclo 5
+  /* Ciclo 5 */
   {id:'HERR_DEC',name:'Herramientas Informáticas para la Toma de Decisiones',cycle:5,prereqs:[]},
   {id:'DIS_PAT',name:'Diseño de Patrones',cycle:5,prereqs:['BD1','POO']},
   {id:'BD2',name:'Base de Datos II',cycle:5,prereqs:['BD1']},
@@ -122,7 +92,7 @@ const courses = [
   {id:'SO',name:'Sistemas Operativos',cycle:5,prereqs:['BD1']},
   {id:'AED',name:'Algoritmos y Estructuras de Datos',cycle:5,prereqs:['ADS_ALG','POO']},
 
-  // Ciclo 6
+  /* Ciclo 6 */
   {id:'CSS_ADV',name:'Hojas de Estilo en Cascada Avanzado',cycle:6,prereqs:['TALL_WEB']},
   {id:'FRAME_WEB',name:'Marcos de Desarrollo Web',cycle:6,prereqs:['TALL_WEB']},
   {id:'JS_ADV',name:'JavaScript Avanzado',cycle:6,prereqs:['TALL_WEB']},
@@ -131,7 +101,7 @@ const courses = [
   {id:'ADSI',name:'Análisis y Diseño de Sistemas de Información',cycle:6,prereqs:['AED']},
   {id:'CUR_INT1',name:'Curso Integrador I',cycle:6,prereqs:['AED']},
 
-  // Ciclo 7
+  /* Ciclo 7 */
   {id:'WEB_INT',name:'Desarrollo Web Integrado',cycle:7,prereqs:['CSS_ADV','FRAME_WEB','JS_ADV']},
   {id:'SEG_INF',name:'Seguridad Informática',cycle:7,prereqs:['REDES1']},
   {id:'HERR_DEV',name:'Herramientas de Desarrollo',cycle:7,prereqs:['CSS_ADV','FRAME_WEB','JS_ADV']},
@@ -140,7 +110,7 @@ const courses = [
   {id:'DIS_PROD',name:'Diseño de Productos y Servicios',cycle:7,prereqs:['ADM_EMP']},
   {id:'LID_EQ',name:'Liderazgo y Gestión de Equipos',cycle:7,prereqs:['ADM_EMP']},
 
-  // Ciclo 8
+  /* Ciclo 8 */
   {id:'HERR_PROTO',name:'Herramientas de Prototipado',cycle:8,prereqs:['DIS_PROD']},
   {id:'GEST_SERV_TI',name:'Gestión del Servicio TI',cycle:8,prereqs:['ADSI']},
   {id:'NEG_NAR',name:'Negociación y Narrativa',cycle:8,prereqs:['ADM_EMP']},
@@ -149,7 +119,7 @@ const courses = [
   {id:'ARQ_EMP',name:'Arquitectura Empresarial',cycle:8,prereqs:['ADSI']},
   {id:'INT_NEG',name:'Inteligencia de Negocios',cycle:8,prereqs:['HERR_DEV','BD2']},
 
-  // Ciclo 9
+  /* Ciclo 9 */
   {id:'IHM',name:'Interacción Hombre‑Máquina',cycle:9,prereqs:['DIS_PROD','ADSI']},
   {id:'GEST_CON',name:'Gestión del Conocimiento',cycle:9,prereqs:['INT_NEG']},
   {id:'PLAN_ESTR_TIC',name:'Planeamiento Estratégico de las TIC',cycle:9,prereqs:['ARQ_EMP']},
@@ -157,7 +127,7 @@ const courses = [
   {id:'CUR_INT2',name:'Curso Integrador II',cycle:9,prereqs:['INT_NEG','ARQ_EMP','CUR_INT1']},
   {id:'FOR_INV',name:'Formación para la Investigación',cycle:9,prereqs:['CRT2','INV_ACAD','CUR_INT1']},
 
-  // Ciclo 10
+  /* Ciclo 10 */
   {id:'CLOUD_SERV',name:'Servicios Cloud',cycle:10,prereqs:['REDES1']},
   {id:'NUEV_TEC',name:'Nuevas Tecnologías y Tendencias',cycle:10,prereqs:['INNOV_TD']},
   {id:'ING_ECON',name:'Ingeniería Económica',cycle:10,prereqs:['SI_EMP']},
@@ -168,49 +138,50 @@ const courses = [
   {id:'DEV_SOFT',name:'Desarrollo de Software',cycle:10,prereqs:['ADSI']}
 ];
 
-// ---------- Estado ----------
-const storageKey='isi-progress';
-let completed=new Set(JSON.parse(localStorage.getItem(storageKey)||'[]'));
+/* ----- Estado almacenado ----- */
+const STORAGE_KEY='isi-progress';
+let completed=new Set(JSON.parse(localStorage.getItem(STORAGE_KEY)||'[]'));
 
-// ---------- Utilidades ----------
+/* ----- Funciones auxiliares ----- */
 const isUnlocked=course=>course.prereqs.every(p=>completed.has(p));
-const toggleCourse=id=>{
-  if(completed.has(id)){completed.delete(id);}else{completed.add(id);}
-  localStorage.setItem(storageKey,JSON.stringify([...completed]));
+function toggleCourse(id){
+  completed.has(id)?completed.delete(id):completed.add(id);
+  localStorage.setItem(STORAGE_KEY,JSON.stringify([...completed]));
   render();
-};
+}
 
-// ---------- Render ----------
+/* ----- Renderizado ----- */
 function render(){
   const board=document.getElementById('board');
   board.innerHTML='';
   for(let cycle=1;cycle<=10;cycle++){
     const col=document.createElement('div');
     col.className='cycle';
-    const h=document.createElement('h2');
-    h.textContent=`${cycle}.º ciclo`;
-    col.appendChild(h);
+    const h2=document.createElement('h2');
+    h2.textContent=`${cycle}.º ciclo`;
+    col.appendChild(h2);
 
     courses.filter(c=>c.cycle===cycle).forEach(c=>{
       const btn=document.createElement('button');
-      btn.className='course';
       btn.textContent=c.name;
+      btn.className='course';
       const locked=!isUnlocked(c);
       if(completed.has(c.id)){
         btn.classList.add('completed');
       }else if(locked){
         btn.classList.add('locked');
+        btn.disabled=true;
       }else{
         btn.classList.add('unlocked');
+        btn.disabled=false;
       }
-      btn.disabled=locked;
-      btn.onclick=()=>toggleCourse(c.id);
+      if(!locked) btn.addEventListener('click',()=>toggleCourse(c.id));
       col.appendChild(btn);
     });
+
     board.appendChild(col);
   }
 }
-
 render();
 </script>
 
